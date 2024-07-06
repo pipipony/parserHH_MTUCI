@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск вакансий</title>
+</head>
+<body>
+    <h1>Поиск вакансий</h1>
+    <form id="searchForm">
+        <label for="min_salary">Минимальная зарплата:</label>
+        <input type="number" id="min_salary" name="min_salary"><br>
+        <label for="max_salary">Максимальная зарплата:</label>
+        <input type="number" id="max_salary" name="max_salary"><br>
+        <label for="area">Город:</label>
+        <input type="text" id="area" name="area"><br>
+        <label for="schedule">График:</label>
+        <input type="text" id="schedule" name="schedule"><br>
+        <label for="experience">Опыт работы:</label>
+        <input type="text" id="experience" name="experience"><br>
+        <button type="button" onclick="search()">Поиск</button>
+    </form>
+    <div id="results"></div>
+    <script>
+        function search() {
+            const form = document.getElementById('searchForm');
+            const formData = new FormData(form);
+            fetch('/search', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+                data.forEach(vacancies => {
+                    resultsDiv.innerHTML += `<p>${vacancies}</p>`;
+                });
+                console.log(data);
+            });
+        }
+    </script>
+</body>
+</html>

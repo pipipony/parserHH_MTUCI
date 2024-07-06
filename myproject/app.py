@@ -1,10 +1,8 @@
+from flask import Flask, render_template, request, jsonify
 import requests
-from bs4 import BeautifulSoup
-import json  # Для обработки полученных результатов
-import time  # Для задержки между запросами
-import os  # Для работы с файлами
-import pandas as pd  # Для формирования датафрейма с результатами
 import sqlite3
+
+app = Flask(__name__)
 
 
 def get_vacancies():
@@ -37,16 +35,11 @@ def vac2db(vacancies):
             vacancy['id'],
             vacancy['name'],
             vacancy['area']['name'],
-            vacancy['salary']['from']
-            if vacancy['salary'] else None,
-            vacancy['salary']['to']
-            if vacancy['salary'] else None,
-            vacancy['salary']['currency']
-            if vacancy['salary'] else None,
-            vacancy['schedule']['name']
-            if vacancy['schedule'] else None,
-            vacancy['experience']['name']
-            if vacancy['experience'] else None
+            vacancy['salary']['from'] if vacancy['salary'] else None,
+            vacancy['salary']['to'] if vacancy['salary'] else None,
+            vacancy['salary']['currency'] if vacancy['salary'] else None,
+            vacancy['schedule']['name'] if vacancy['schedule'] else None,
+            vacancy['experience']['name'] if vacancy['experience'] else None
         ))
     connection.commit()
     connection.close()
@@ -76,3 +69,24 @@ def filter_vacancies(min_salary=None, max_salary=None, area=None, schedule=None,
     results = cursor.fetchall()
     connection.close()
     return results
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/search', methods=['POST'])
+def search():
+    print("1234567")
+    min_salary = request.form.get('min_salary')
+    max_salary = request.form.get('max_salary')
+    area = request.form.get('area')
+    schedule = request.form.get('schedule')
+    experience = request.form.get('experience')
+    vacancies = filter_vacancies(min_salary, max_salary, area, schedule, experience)
+    return jsonify(vacancies)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
